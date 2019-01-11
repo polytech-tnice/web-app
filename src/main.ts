@@ -10,7 +10,7 @@ Vue.use(ElementUI);
 Vue.use(
   new VueSocketIO({
     debug: true,
-    connection: process.env.VUE_APP_BACKEND_ENDPOINT,
+    connection: process.env.VUE_APP_BACKEND_ENDPOINT as string,
   }),
 );
 new Vue({
