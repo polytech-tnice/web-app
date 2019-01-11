@@ -10,7 +10,7 @@ Vue.use(ElementUI);
 Vue.use(
   new VueSocketIO({
     debug: true,
-    connection: '10.212.111.122:3000',
+    connection: process.env.VUE_APP_BACKEND_ENDPOINT,
   }),
 );
 new Vue({
