@@ -19,11 +19,19 @@
           <el-form-item label="Nom du joueur 2" prop="name_p2">
             <el-input v-model="ruleForm.name_p2"></el-input>
           </el-form-item>
+
           <el-form-item>
             <el-button type="primary" @click="submitForm('ruleForm')">Créer</el-button>
             <el-button @click="resetForm('ruleForm')">Annuler</el-button>
           </el-form-item>
         </el-form>
+        <el-alert
+          v-if="!socketConnected"
+          title="Impossible de se connecter au serveur"
+          type="error"
+          show-icon
+          :closable="false"
+        ></el-alert>
       </el-card>
     </el-col>
   </el-row>
@@ -32,6 +40,7 @@
 export default {
   data() {
     return {
+      socketConnected: false,
       ruleForm: {
         name: "",
         name_p1: "",
@@ -64,14 +73,28 @@ export default {
   },
   sockets: {
     connect: function() {
+      this.socketConnected = true;
       console.log("socket connected");
-      this.$socket.emit('authentification',  "webApp")
+      this.$socket.emit(
+        "authentication",
+        JSON.stringify({
+          name: "webApp"
+        })
+      );
     },
     initGameReceived: function() {
       this.$notify({
         title: "Succès",
         message: "Partie correctement paramétrée",
         type: "success"
+      });
+    },
+    fail: function(error) {
+      const errorDesc = error && JSON.parse(error).desc;
+      this.$notify({
+        title: "Erreur",
+        message: errorDesc || "Erreur lors de la création de la partie",
+        type: "error"
       });
     }
   },
