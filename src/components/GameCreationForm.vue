@@ -77,9 +77,9 @@ export default {
       console.log("socket connected");
       this.$socket.emit(
         "authentication",
-        JSON.stringify({
+        {
           name: "webApp"
-        })
+        }
       );
     },
     initGameReceived: function() {
@@ -90,7 +90,7 @@ export default {
       });
     },
     fail: function(error) {
-      const errorDesc = error && JSON.parse(error).desc;
+      const errorDesc = error && error.desc;
       this.$notify({
         title: "Erreur",
         message: errorDesc || "Erreur lors de la création de la partie",
@@ -107,7 +107,7 @@ export default {
             player1_name: this.ruleForm.name_p1,
             player2_name: this.ruleForm.name_p2
           };
-          this.$socket.emit("initGame", JSON.stringify(initParams));
+          this.$socket.emit("initGame", initParams);
         } else {
           console.log("error submit!!");
           return false;
