@@ -1,7 +1,7 @@
 <template>
   <el-row :gutter="20">
     <el-col :span="10" :offset="7">
-      <el-card header="Création de partie">
+      <el-card v-if="!gameCreated" header="Création de partie">
         <el-form
           :model="ruleForm"
           :rules="rules"
@@ -21,7 +21,11 @@
           </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" @click="submitForm('ruleForm')">Créer</el-button>
+            <el-button
+              type="primary"
+              @click="submitForm('ruleForm')"
+              :disabled="!socketConnected"
+            >Créer</el-button>
             <el-button @click="resetForm('ruleForm')">Annuler</el-button>
           </el-form-item>
         </el-form>
@@ -33,6 +37,12 @@
           :closable="false"
         ></el-alert>
       </el-card>
+      <el-card v-else :header="`Partie ${ruleForm.name}`">
+        <div class="text item">Joueur 1 : {{ruleForm.name_p1}}</div>
+        <div class="text item">Joueur 2 : {{ruleForm.name_p2}}</div>
+        <br>
+        <el-button v-if="gameCreated" @click="launchGame">Lancer la partie</el-button>
+      </el-card>
     </el-col>
   </el-row>
 </template>
@@ -41,6 +51,7 @@ export default {
   data() {
     return {
       socketConnected: false,
+      gameCreated: false,
       ruleForm: {
         name: "",
         name_p1: "",
@@ -65,7 +76,7 @@ export default {
           {
             required: true,
             message: "Veuillez préciser le nom du joueur 2",
-            trigger: "change"
+            trigger: "blur"
           }
         ]
       }
@@ -75,12 +86,14 @@ export default {
     connect: function() {
       this.socketConnected = true;
       console.log("socket connected");
-      this.$socket.emit(
-        "authentication",
-        {
-          name: "webApp"
-        }
-      );
+      this.$socket.emit("authentication", {
+        name: "webApp"
+      });
+      this.$notify({
+        title: "Succès",
+        message: "Connecté au serveur",
+        type: "success"
+      });
     },
     initGameReceived: function() {
       this.$notify({
@@ -88,6 +101,8 @@ export default {
         message: "Partie correctement paramétrée",
         type: "success"
       });
+
+      this.gameCreated = true;
     },
     fail: function(error) {
       const errorDesc = error && error.desc;
@@ -95,6 +110,22 @@ export default {
         title: "Erreur",
         message: errorDesc || "Erreur lors de la création de la partie",
         type: "error"
+      });
+    },
+    success: function(msg) {
+      const msgDesc = msg && msg.desc;
+      this.$notify({
+        title: "Succès",
+        message: msgDesc || "Partie correctement lancée",
+        type: "success"
+      });
+    },
+    disconnect: function() {
+      console.log("disconnect");
+      this.$notify({
+        title: "Information",
+        message: "Déconnecté du serveur",
+        type: "warning"
       });
     }
   },
@@ -116,6 +147,11 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
+    },
+    launchGame() {
+      this.$socket.emit("launchGame", {
+        name: this.ruleForm.name
+      });
     }
   }
 };
