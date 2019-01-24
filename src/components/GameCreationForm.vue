@@ -41,7 +41,11 @@
         <div class="text item">Joueur 1 : {{ruleForm.name_p1}}</div>
         <div class="text item">Joueur 2 : {{ruleForm.name_p2}}</div>
         <br>
-        <el-button v-if="gameCreated" @click="launchGame">Lancer la partie</el-button>
+        <el-button
+          v-if="gameCreated"
+          @click="launchGame"
+          :loading="gameInProgress"
+        >{{gameInProgress ? "Partie en cours" : "Lancer la partie"}}</el-button>
       </el-card>
     </el-col>
   </el-row>
@@ -52,6 +56,7 @@ export default {
     return {
       socketConnected: false,
       gameCreated: false,
+      gameInProgress: false,
       ruleForm: {
         name: "",
         name_p1: "",
@@ -95,16 +100,8 @@ export default {
         type: "success"
       });
     },
-    initGameReceived: function() {
-      this.$notify({
-        title: "Succès",
-        message: "Partie correctement paramétrée",
-        type: "success"
-      });
-
-      this.gameCreated = true;
-    },
     fail: function(error) {
+      console.log("Event error : ", error.code);
       const errorDesc = error && error.desc;
       this.$notify({
         title: "Erreur",
@@ -113,12 +110,21 @@ export default {
       });
     },
     success: function(msg) {
+      console.log("Event success : ", msg.code);
       const msgDesc = msg && msg.desc;
       this.$notify({
         title: "Succès",
         message: msgDesc || "Partie correctement lancée",
         type: "success"
       });
+
+      if (msg.code === 2) {
+        this.gameCreated = true;
+      }
+
+      if (msg.code === 3) {
+        this.gameInProgress = true;
+      }
     },
     disconnect: function() {
       console.log("disconnect");
@@ -127,6 +133,7 @@ export default {
         message: "Déconnecté du serveur",
         type: "warning"
       });
+      this.gameCreated = false;
     }
   },
   methods: {
