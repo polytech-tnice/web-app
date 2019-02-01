@@ -126,6 +126,17 @@ export default {
         this.gameInProgress = true;
       }
     },
+    launchGame_success: function(msg) {
+      console.log("Event success : ", msg.code);
+      const msgDesc = msg && msg.desc;
+      this.$notify({
+        title: "Succès",
+        message: msgDesc || "Partie correctement lancée",
+        type: "success"
+      });
+
+      this.gameInProgress = true;
+    },
     disconnect: function() {
       console.log("disconnect");
       this.$notify({
