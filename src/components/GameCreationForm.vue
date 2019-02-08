@@ -58,9 +58,9 @@ export default {
       gameCreated: false,
       gameInProgress: false,
       ruleForm: {
-        name: "",
-        name_p1: "",
-        name_p2: ""
+        name: "Game1",
+        name_p1: "Joueur1",
+        name_p2: "Joueur2"
       },
       rules: {
         name: [
@@ -99,6 +99,12 @@ export default {
         message: "Connecté au serveur",
         type: "success"
       });
+      let initParams = {
+        game_name: this.ruleForm.name,
+        player1_name: this.ruleForm.name_p1,
+        player2_name: this.ruleForm.name_p2
+      };
+      this.$socket.emit("initGame", initParams);
     },
     fail: function(error) {
       console.log("Event error : ", error.code);
